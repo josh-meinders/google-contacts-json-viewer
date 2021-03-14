@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<base target="_top">
+  <style>
+    .string {
+      color: maroon
+    }
+    .boolean {
+      color: blue
+    }
+  </style>
+
+</head>
+
+<body>
+	<pre>Loading Google Contacts as JSON for <?= Session.getEffectiveUser().getEmail() ?></pre>
+	<script>
+		document.addEventListener("DOMContentLoaded", function(){
+      google.script.run
+        .withFailureHandler(showError)
+        .withSuccessHandler(showData)
+        .getConnections();
+    });
+
+    const showError = (e) => {
+      document.querySelector("pre").innerHTML = "Error: " + e
+    }
+
+    const showData = (connections) => {
+      const el = document.querySelector("pre")
+      el.innerHTML = syntaxHighlight(connections)
+      el.select()
+      document.execCommand("copy")
+    }
+
+    const syntaxHighlight = (json) => {
+      json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+          var cls = 'number';
+          if (/^"/.test(match)) {
+              if (/:$/.test(match)) {
+                  cls = 'key';
+              } else {
+                  cls = 'string';
+              }
+          } else if (/true|false/.test(match)) {
+              cls = 'boolean';
+          } else if (/null/.test(match)) {
+              cls = 'null';
+          }
+          return '<span class="' + cls + '">' + match + '</span>';
+        });
+      }
+
+	</script>
+</body>
+
+</html>
